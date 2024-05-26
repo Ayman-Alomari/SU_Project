@@ -4,7 +4,7 @@
 #include<iostream>
 #include "hero.h"
 #include "enemy.h"
-
+#include "cave.h"
 
 #include <string>
 
@@ -12,6 +12,7 @@ int main(int argc, char *argv[]){
 
     Hero hero;
     Enemy enemy;
+    Cave cave;
 
     QCoreApplication a(argc, argv);
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
@@ -23,10 +24,33 @@ int main(int argc, char *argv[]){
 
 
 
+//      magic.Select_Magic();
+
     hero.start_playing();
 
     while(1){
 
+        QString option;
+        do {
+            qDebug() << "  >> Let's start playing, Shall we !? Please choose one of the following optoins: ";
+            qDebug() << "1. Select a cave to enter.";
+            qDebug() << "2. Select an enemy to fight. ";
+            QTextStream qtin(stdin);
+            option = qtin.readLine();
+
+            if (option == "1") {
+                    //Select a cave to enter.
+
+                cave.Select_cave();
+                if(hero.fightEnemyInCave(&cave)){
+                    if(hero.DefeatedEnemyInCave_Actions()){
+                        break;
+                    }
+
+                }
+            }
+            else if (option == "2") {
+                // Select an enemy to fight.
 
                 enemy.Select_enemy();
                 if(hero.fightEnemy(&enemy)){
@@ -37,7 +61,14 @@ int main(int argc, char *argv[]){
                 }
             }
 
+            else {
+                qDebug() << "Invalid option. Please choose a valid option." << Qt::endl;
+            }
 
+        }
+        while (option != "1" && option != "2");
+
+    }
 
     return 0;
 }

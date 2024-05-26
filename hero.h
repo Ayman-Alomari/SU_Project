@@ -1,11 +1,10 @@
 #ifndef HERO_H
 #define HERO_H
 
-//#include <QMainWindow>
 #include <QtSql>
 #include <QSqlDatabase>
 #include "enemy.h"
-
+#include "cave.h"
 
 
 class Hero
@@ -16,6 +15,8 @@ private:
     int _level;
     int _xp;
     int _strength;
+    int _gold;
+    int _id;
 
 public:
     Hero();
@@ -40,6 +41,12 @@ public:
     void ContinueBattle();
 
     void SaveAndExit();
+
+    bool fightEnemyInCave(Cave* cave);
+
+    bool DefeatedEnemyInCave_Actions();
+
+    bool Defeated_Cave_Actions();
 
 
 };

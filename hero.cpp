@@ -60,13 +60,14 @@ void Hero::Make_Hero(QString name){
     _xp = 0;
     _level = 1;
     _strength = 2;
+    _gold = 0;
 
       query.prepare("INSERT INTO hero (Name, HP, XP, Level, Strength, Gold) VALUES (?, 10, 0, 1, 2, 0)");
       query.bindValue(0, name);
 
       if(query.exec()) {
           qDebug() << "The hero" << _name <<"successfully created and saved to the database." << Qt::endl;
-          qDebug() << "The hero" << _name <<" with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" << "has been created. " << Qt::endl;
+          qDebug() << "The hero" << _name <<" with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" << _gold << "Gold" << "has been created. " << Qt::endl;
       }
       else {
           qDebug() << "Error: Failed to create hero in the database.";
@@ -143,10 +144,11 @@ bool Hero::Load_Hero() {
                 _xp = query.value(2).toInt();
                 _level = query.value(3).toInt();
                 _strength = query.value(4).toInt();
+                _gold = query.value(5).toInt();
 
                 qDebug() << "Hero loaded successfully." << Qt::endl;
 
-                qDebug() << "Hero with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" << "has been uploaded. " << Qt::endl;
+                qDebug() << "Hero with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" <<_gold << "gold" << "has been uploaded. " << Qt::endl;
                 validChoice = true;
             }
             else {
@@ -180,7 +182,13 @@ int Hero::get_strength(){
     return _strength ;
 }
 
+int Hero::get_gold(){
+    return _gold;
+}
 
+int Hero::get_id(){
+    return _id;
+}
 
 bool Hero::fightEnemy(Enemy* enemy) {
     QSqlQuery query;
@@ -289,6 +297,7 @@ void Hero::SaveAndExit(){
     query.bindValue(":level", _level);
     query.bindValue(":strength", _strength);
     query.bindValue(":name", _name);
+    query.bindValue(":gold", _gold);
     query.exec();
 
     if (query.exec()) {
@@ -334,6 +343,157 @@ void Hero::ContinueBattle() {
     }
 }
 
+bool Hero::fightEnemyInCave(Cave* cave) {
+    QSqlQuery query;
+    query.prepare("Select COUNT(enemy_id) FROM Cave_enemy WHERE cave_id = :cave_id");
+    query.bindValue(":cave_id", cave->get_id());
+
+    query.exec();
+    query.first();
+
+    int enemy_count = query.value(0).toInt();
+
+    for(int i = 1; i <= enemy_count; i++){
+
+
+        qDebug() << "The hero is fighting the enemy: " << cave->get_enemyName(i) << Qt::endl;
+
+        QString enemy_name = cave->get_enemyName(i);
+            int enemy_hp = cave->get_enemyHp(i);
+            int enemy_xp = cave->get_enemyXp(i);
+            int enemy_strength = cave->get_enemyStrength(i);
+
+        while (enemy_hp > 0 && _hp > 0){
+            enemy_hp -= _strength;
+
+            _hp -= enemy_strength;
+
+            qDebug() << "The hero attacked the enemy with power: " << _strength << Qt::endl;
+            qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
+            qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
+
+
+            if (_hp <=0){
+                qDebug() << "The hero" << this->get_name() << " has been defeated by the enemy " << enemy_name << "!" << Qt::endl;
+                qDebug() << "Game Over and good luck next time ! " << Qt::endl;
+                QSqlQuery query;
+                        query.prepare("DELETE FROM hero WHERE name = :name");
+                        query.bindValue(":name", _name);
+
+                        query.exec();
+                        if (query.exec()) {
+                            qDebug() << "Hero" << _name <<" has been removed successfully." <<Qt::endl;
+                        }
+                        else {
+                            qDebug() << "Error: Failed removing hero from the database." << query.lastError().text()<< Qt::endl;
+                        }
+                exit(0);
+            }
+
+            if (enemy_hp <= 0) {
+                qDebug() << "The enemy has been defeated by the hero " << this->get_name() << " !" << Qt::endl;
+                _xp +=enemy_xp;
+
+                if (_hp < 10) {
+                    _hp = 10;
+                }
+
+                if (_xp >= _level * 1000){
+                  levelUp();
+
+                }
+                if(i==enemy_count){
+                    Defeated_Cave_Actions();
+                    return true;
+                }
+                else {
+
+                    if (DefeatedEnemyInCave_Actions()){
+                        return true;
+                    }
+                }
+     //           return true;
+
+            }
+            else {
+                  qDebug() << "The hero couldn't defeat the enemy in one attack. The battle continues..." << Qt::endl;
+
+                  ContinueBattle();
+            }
+        }
+    }
+    return true;
+}
+
+bool Hero::DefeatedEnemyInCave_Actions(){
+    bool validChoice = false;
+    while (!validChoice) {
+        QString option;
+        do {
+            qDebug() << "Select an option:";
+            qDebug() << "1. Exit without saving";
+            qDebug() << "2. Continue and fight the other enemies ";
+            QTextStream qtin(stdin);
+            option = qtin.readLine();
+
+            if (option == "1") {
+                    //Exit without saving
+
+                exit(0);
+
+                validChoice = true;
+                return true;
+            }
+            else if (option == "2") {
+                // Continue and fight the other enemies.
+
+                validChoice = true;
+                return false;
+            }
+            else {
+                qDebug() << "Invalid option. Please choose a valid option." << Qt::endl;
+            }
+        }
+      while (option != "1" && option != "2");
+    }
+    return true;
+}
+
+bool Hero::Defeated_Cave_Actions(){
+
+        QString option;
+
+        do {
+            qDebug() << "Select an option:";
+            qDebug() << "1. Exit without saving";
+            qDebug() << "2. Save and exit ";
+            qDebug() << "3. Continue playing  ";
+
+            QTextStream qtin(stdin);
+            option = qtin.readLine();
+
+            if (option == "1") {
+                    //Exit without saving
+
+                exit(0);
+
+                return true;
+            }
+            else if (option == "2") {
+                // Save and Exit.
+                    SaveAndExit();
+                    exit(0);
+                return true;
+            }
+            else {
+                qDebug() << "Invalid option. Please choose a valid option." << Qt::endl;
+            }
+        }
+      while (option != "1" && option != "2" && option != "3");
+
+  return true;
+
+}
 
 
 

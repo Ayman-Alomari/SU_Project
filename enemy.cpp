@@ -89,5 +89,3 @@ int Enemy::get_strength(){
 QString Enemy::get_name(){
     return  _name;
 }
-
-
