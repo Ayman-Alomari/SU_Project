@@ -201,13 +201,45 @@ bool Hero::fightEnemy(Enemy* enemy) {
         int enemy_strength = enemy->get_strength();
 
     while (enemy_hp > 0 && _hp > 0){
-        enemy_hp -= _strength;
+                QString option;
+        do {
+            qDebug() << "Select an option:";
+            qDebug() << "1. Attack with magic";
+            qDebug() << "2. Attack without magic";
 
-        _hp -= enemy_strength;
+            QTextStream qtin(stdin);
+            option = qtin.readLine();
 
-        qDebug() << "The hero attacked the enemy with power: " << _strength << Qt::endl;
-        qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
-        qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
+            if (option == "1") {
+                    //Attack with magic
+                enemy_hp -= _strength ;
+
+                _hp -= enemy_strength;
+
+                qDebug() << "The hero attacked the enemy with power: " << _strength << Qt::endl;
+                qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
+                qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
+
+            }
+            else if (option == "2") {
+                // Attack without magic
+
+                enemy_hp -= _strength;
+
+                _hp -= enemy_strength;
+
+                qDebug() << "The hero attacked the enemy with power: " << _strength << Qt::endl;
+                qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
+                qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
+
+            }
+            else {
+                qDebug() << "Invalid option. Please choose a valid option." << Qt::endl;
+            }
+        }
+      while (option != "1" && option != "2");
+
+
 
 
         if (_hp <=0){
@@ -290,7 +322,7 @@ bool Hero::DefeatedEnemyActions(){
 
 void Hero::SaveAndExit(){
     QSqlQuery query;
-    query.prepare("UPDATE hero SET hp = :hp, xp = :xp, level = :level, strength = :strength, gold = :gold WHERE name = :name");
+    query.prepare("UPDATE hero SET hp = :hp, xp = :xp, level = :level, strength = :strength, gold = :gold, magic_level = :magic_level WHERE name = :name");
 
     query.bindValue(":hp", _hp);
     query.bindValue(":xp", _xp);
@@ -298,6 +330,7 @@ void Hero::SaveAndExit(){
     query.bindValue(":strength", _strength);
     query.bindValue(":name", _name);
     query.bindValue(":gold", _gold);
+    query.bindValue(":magic_level", _magic_level);
     query.exec();
 
     if (query.exec()) {
@@ -311,6 +344,7 @@ void Hero::SaveAndExit(){
 
 void Hero::levelUp() {
            _level++;
+           _magic_level++;
            _hp += 2;
            _strength++;
            _xp=0;
@@ -496,16 +530,64 @@ bool Hero::Defeated_Cave_Actions(){
 }
 
 
+bool Hero::Buy_Magic(Magic* magic) {
+    QSqlQuery query;
+
+    int magic_id = magic->get_id();
+    QString magic_name = magic->get_name();
+
+        int magic_strength = magic->get_strength();
+
+        int magic_Self_strength = magic->get_Self_strength();
+        int magic_cost = magic->get_magic_cost();
+        QString magic_element = magic->get_element();
+        int magic_gold_cost = magic->get_gold_cost();
+        QString magic_requirement = magic->get_requirement();
+
+        query.prepare("SELECT Gold FROM hero WHERE name = :name");
+
+        query.bindValue(":name", _name);
+        if (query.exec() && query.next()) {
+            if (_gold >= magic_gold_cost) {
+
+                qDebug() << "You have bought the magic " << magic_name << " which has" << magic_strength << " strength " << magic_Self_strength << " self_strength " << magic_cost << " magic_cost " << magic_gold_cost << " gold_cost " << magic_requirement << " requirement " <<  Qt::endl;
+
+                // Update hero's gold:
+                query.prepare("UPDATE hero SET Gold = :gold WHERE name = :name");
+                query.bindValue(":name", _name);
+                query.bindValue(":gold", _gold - magic_gold_cost);
+                query.exec();
+
+                // Update hero's magic info:
+                query.prepare("INSERT INTO Magic_Shop (hero_id, magic_id, purchased) VALUES (:hero_id, :magic_id, 1)");
+                       query.bindValue(":hero_id", _id);
+                       query.bindValue(":magic_id", magic_id);
+                       // query.exec();
+                       if (!query.exec()) {
+                                  qDebug() << "Error executing query: " << query.lastError().text() << Qt::endl;
+                       }
+            }
+            else {
+                qDebug() << "You don't have enough gold to buy this magic." << Qt::endl;
+            }
+
+        }
+        else {
+            qDebug() << "Error retrieving hero data from the database." << Qt::endl;
+
+        }
 
 
 
+        return true;
 
+}
 
 
 
 
 /*Hero::~Hero()
 {
-    delete ;
+delete ;
 }
 */

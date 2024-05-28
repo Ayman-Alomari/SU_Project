@@ -5,6 +5,7 @@
 #include "hero.h"
 #include "enemy.h"
 #include "cave.h"
+#include "magic.h"
 
 #include <string>
 
@@ -13,16 +14,32 @@ int main(int argc, char *argv[]){
     Hero hero;
     Enemy enemy;
     Cave cave;
+    Magic magic;
 
     QCoreApplication a(argc, argv);
+
+////////////////////////////  Database ////////////////////////////
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");
-    db.setDatabaseName("SU_Project"); // Ret til det schema navn du har valgt
-    db.setUserName("root"); // Ret brugernavn
-    db.setPassword("password");// Ret password
-    db.open();
+    db.setDatabaseName("SU_Project");
 
+    std::cout << "Enter database username: ";
+    std::string username;
+    std::cin >> username;
+    db.setUserName(username.c_str());
 
+    std::cout << "Enter database password: ";
+    std::string password;
+    std::cin >> password;
+    db.setPassword(password.c_str());
+
+    if (!db.open()) {
+        qDebug()  << "Failed to open database: " << db.lastError().text() << Qt::endl;
+        return 1;
+    }
+
+////////////////////////////////////////////////////////////////////////////////////
 
 //      magic.Select_Magic();
 
@@ -40,9 +57,12 @@ int main(int argc, char *argv[]){
 
             if (option == "1") {
                     //Select a cave to enter.
+                magic.Select_Magic();
+                hero.Buy_Magic(&magic);
 
                 cave.Select_cave();
                 if(hero.fightEnemyInCave(&cave)){
+
                     if(hero.DefeatedEnemyInCave_Actions()){
                         break;
                     }

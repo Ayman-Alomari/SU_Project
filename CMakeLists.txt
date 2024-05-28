@@ -15,6 +15,7 @@ add_executable(SU_Eksamen main.cpp)
 target_sources(SU_Eksamen PRIVATE enemy.cpp enemy.h)
 target_sources(SU_Eksamen PRIVATE hero.cpp hero.h)
 target_sources(SU_Eksamen PRIVATE cave.cpp cave.h)
+target_sources(SU_Eksamen PRIVATE magic.cpp magic.h)
 
 
 target_link_libraries(SU_Eksamen Qt5::Core Qt5::Quick Qt5::Sql)

@@ -35,7 +35,6 @@ void Cave::FightCaveEnemies(int caveId) {
                 int enemyXp = query.value(2).toInt();
                 int enemyStrength = query.value(3).toInt();
 
-
         }
 
 }
@@ -104,6 +103,7 @@ void Cave::Assign_cave(QString chosenCave) {
         _id = query.value(0).toInt();
 
         qDebug() << "The cave: " << _name << " has " << _gold << " gold to get " << Qt::endl << "But there are these enemies to fight: " << Qt::endl;
+
     }
     else {
 
@@ -141,7 +141,14 @@ void Cave::Assign_cave(QString chosenCave) {
 
             }
         }
-    }
+
+    QTextStream input(stdin);
+    QString userInput;
+
+    qDebug() << " >> Press any button to start fighting. ";
+    input.readLine();
+
+}
 
 
 QString Cave::get_enemyName(int enemy_id){

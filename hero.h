@@ -5,6 +5,7 @@
 #include <QSqlDatabase>
 #include "enemy.h"
 #include "cave.h"
+#include "magic.h"
 
 
 class Hero
@@ -16,6 +17,7 @@ private:
     int _xp;
     int _strength;
     int _gold;
+    int _magic_level;
     int _id;
 
 public:
@@ -33,6 +35,7 @@ public:
     int get_level();
     int get_strength();
     int get_gold();
+    int get_magic_level();
     int get_id();
 
     bool fightEnemy(Enemy* enemy);
@@ -48,6 +51,8 @@ public:
 
     bool Defeated_Cave_Actions();
 
+
+    bool Buy_Magic(Magic* magic);
 
 };
 #endif
