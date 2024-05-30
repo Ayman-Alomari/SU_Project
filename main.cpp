@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
     db.setHostName("localhost");
     db.setDatabaseName("SU_Project_by_M_Ayman_Alomari");
 
-    std::cout << "Befor proceeding to the game, please read the files >> Absolutely_readMe.pdf << "<< std::endl;
+    std::cout << "Befor proceeding to the game, please read the files >> Absolutely_ReadMe.pdf << "<< std::endl;
     std::cout << "   >>  Make sure that you have created the database named exactly >> SU_Project_by_M_Ayman_Alomari << and that you have created the tables which are in the file >> Database_init.txt <<  " << std::endl;
 
     QTextStream input(stdin);
