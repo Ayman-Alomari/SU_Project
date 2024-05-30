@@ -230,7 +230,7 @@ bool Hero::fightEnemy(Enemy* enemy) {
 
                 // check which magic the hero has and then ..
                 QSqlQuery query;
-                query.prepare("SELCET Magic.name, Magic.strength, Magic.self_strngth FROM Magic, Magic_Shop, hero WHERE id = :id, magic_id = :magic_id, magic_name = :magic_name");
+                query.prepare("SELECT Magic.name, Magic.strength, Magic.self_strngth FROM Magic, Magic_Shop, hero WHERE id = :id, magic_id = :magic_id, magic_name = :magic_name");
                 query.bindValue(":id", _id);
                 query.bindValue(":magic_id", magic->get_id());
                 query.bindValue(":magic_name", magic->get_name());
@@ -493,7 +493,7 @@ bool Hero::fightEnemyInCave(Cave* cave) {
 
 
                 QSqlQuery query;
-                query.prepare("SELCET name, strength, self_strngth FROM Magic WHERE name = :magic_name");
+                query.prepare("SELECT name, strength, self_strngth FROM Magic WHERE name = :magic_name");
                 query.bindValue(":magic_name", selectedMagic);
 
 
