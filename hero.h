@@ -19,9 +19,10 @@ private:
     int _gold;
     int _magic_level;
     int _id;
+    Magic *magic;
 
 public:
-    Hero();
+    Hero(Magic *magic);
 
     void levelUp();
 

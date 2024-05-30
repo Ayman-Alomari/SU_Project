@@ -11,10 +11,10 @@
 
 int main(int argc, char *argv[]){
 
-    Hero hero;
     Enemy enemy;
     Cave cave;
     Magic magic;
+    Hero hero(&magic);
 
     QCoreApplication a(argc, argv);
 
@@ -23,6 +23,15 @@ int main(int argc, char *argv[]){
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");
     db.setDatabaseName("SU_Project");
+
+    std::cout << "Befor proceeding to the game, please read the files >> Absolutely_readMe << "<< std::endl;
+    std::cout << "   >>  Make sure that you have created the database named exactly >> SU_Project << and that you have created the tables which are in the file >> Database_init.txt <<  " << std::endl;
+
+    QTextStream input(stdin);
+    QString userInput;
+
+    qDebug() << "Press any button if you ready. ";
+    input.readLine();
 
     std::cout << "Enter database username: ";
     std::string username;
@@ -71,6 +80,8 @@ int main(int argc, char *argv[]){
             }
             else if (option == "2") {
                 // Select an enemy to fight.
+                magic.Select_Magic();
+                hero.Buy_Magic(&magic);
 
                 enemy.Select_enemy();
                 if(hero.fightEnemy(&enemy)){

@@ -160,7 +160,7 @@ QString Cave::get_enemyName(int enemy_id){
     if (query.exec() && query.next()) {
         return query.value(0).toString();
     }
-    return "";
+    return  query.lastError().text();
 }
 
 int Cave::get_enemyHp(int enemy_id){

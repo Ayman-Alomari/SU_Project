@@ -2,7 +2,7 @@
 #include<iostream>
 
 
-Hero::Hero(){}
+Hero::Hero(Magic *magic):magic(magic){}
 
 void Hero::start_playing (){
     QSqlQuery query;
@@ -35,18 +35,22 @@ void Hero::start_playing (){
             Make_Hero(heroName);
             validChoice = true;
 
-        } else if (t==1){
+        }
+        else if (t==1){
             Load_Hero();
             validChoice = true;
 
-          } else if (t==9){
+        }
+        else if (t==9){
                 qDebug() << "Exiting the program...";
             exit(0); // Exit the program
 
-            } else {
+        }
+        else {
                 qDebug() << "Your selection was not recognized!!. Please try again " << Qt::endl;
-              }
+        }
     }
+
 }
 
 
@@ -61,14 +65,16 @@ void Hero::Make_Hero(QString name){
     _level = 1;
     _strength = 2;
     _gold = 0;
+    _magic_level=0;
 
-      query.prepare("INSERT INTO hero (Name, HP, XP, Level, Strength, Gold) VALUES (?, 10, 0, 1, 2, 0)");
+      query.prepare("INSERT INTO hero (Name, HP, XP, Level, Strength, Gold, magic_level) VALUES (?, 10, 0, 1, 2, 0, 0)");
       query.bindValue(0, name);
 
       if(query.exec()) {
           qDebug() << "The hero" << _name <<"successfully created and saved to the database." << Qt::endl;
-          qDebug() << "The hero" << _name <<" with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" << _gold << "Gold" << "has been created. " << Qt::endl;
+          qDebug() << "The hero" << _name <<" with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" << _gold << "Gold" << _magic_level << "magic_level" << "has been created. " << Qt::endl;
       }
+
       else {
           qDebug() << "Error: Failed to create hero in the database.";
       }
@@ -103,7 +109,7 @@ bool Hero::Load_Hero() {
 
                         QString heroName = QString::fromStdString(name);
                         Make_Hero(heroName);
-                      //  validChoice = true;
+
                         return true;
                     }
                     else if(t == 2) {
@@ -145,10 +151,13 @@ bool Hero::Load_Hero() {
                 _level = query.value(3).toInt();
                 _strength = query.value(4).toInt();
                 _gold = query.value(5).toInt();
+                _magic_level = query.value(6).toInt();
+                _id = query.value(7).toInt();
+
 
                 qDebug() << "Hero loaded successfully." << Qt::endl;
 
-                qDebug() << "Hero with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" <<_gold << "gold" << "has been uploaded. " << Qt::endl;
+                qDebug() << "Hero with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" <<_gold << "gold" <<_magic_level << "magic_level" << "has been uploaded. " << Qt::endl;
                 validChoice = true;
             }
             else {
@@ -212,15 +221,27 @@ bool Hero::fightEnemy(Enemy* enemy) {
 
             if (option == "1") {
                     //Attack with magic
-                enemy_hp -= _strength ;
 
-                _hp -= enemy_strength;
+                // check which magic the hero has and then ..
+                QSqlQuery query;
+                query.prepare("SELCET Magic.name, Magic.strength, Magic.self_strngth FROM Magic, Magic_Shop, hero WHERE id = :id, magic_id = :magic_id, magic_name = :magic_name");
+                query.bindValue(":id", _id);
+                query.bindValue(":magic_id", magic->get_id());
+                query.bindValue(":magic_name", magic->get_name());
 
-                qDebug() << "The hero attacked the enemy with power: " << _strength << Qt::endl;
+                int magic_strength = magic->get_strength();
+                int magic_Self_strength = magic->get_Self_strength();
+
+                enemy_hp -= _strength + magic_strength ;
+
+                _hp -= enemy_strength+magic_Self_strength;
+
+                qDebug() << "The hero attacked the enemy with power: " << _strength + magic_strength << Qt::endl;
                 qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
                 qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
 
             }
+
             else if (option == "2") {
                 // Attack without magic
 
@@ -238,9 +259,6 @@ bool Hero::fightEnemy(Enemy* enemy) {
             }
         }
       while (option != "1" && option != "2");
-
-
-
 
         if (_hp <=0){
             qDebug() << "The hero" << this->get_name() << " has been defeated by the enemy " << enemy_name << "!" << Qt::endl;
@@ -272,8 +290,6 @@ bool Hero::fightEnemy(Enemy* enemy) {
 
             }
 
-
-            // DefeatedEnemyActions();
             return true;
 
         }
@@ -283,7 +299,9 @@ bool Hero::fightEnemy(Enemy* enemy) {
               ContinueBattle();
         }
     }
+
     return true;
+
 }
 
 bool Hero::DefeatedEnemyActions(){
@@ -321,7 +339,9 @@ bool Hero::DefeatedEnemyActions(){
 }
 
 void Hero::SaveAndExit(){
+
     QSqlQuery query;
+
     query.prepare("UPDATE hero SET hp = :hp, xp = :xp, level = :level, strength = :strength, gold = :gold, magic_level = :magic_level WHERE name = :name");
 
     query.bindValue(":hp", _hp);
@@ -387,7 +407,16 @@ bool Hero::fightEnemyInCave(Cave* cave) {
 
     int enemy_count = query.value(0).toInt();
 
-    for(int i = 1; i <= enemy_count; i++){
+    query.prepare("Select enemy_id FROM Cave_enemy WHERE cave_id = :cave_id");
+    query.bindValue(":cave_id", cave->get_id());
+
+    query.exec();
+    query.first();
+
+    int enemy_id = query.value(0).toInt();
+
+
+    for(int i = enemy_id; i <= enemy_count+enemy_id; i++){
 
 
         qDebug() << "The hero is fighting the enemy: " << cave->get_enemyName(i) << Qt::endl;
@@ -398,6 +427,86 @@ bool Hero::fightEnemyInCave(Cave* cave) {
             int enemy_strength = cave->get_enemyStrength(i);
 
         while (enemy_hp > 0 && _hp > 0){
+
+            QString option;
+    do {
+        qDebug() << "Select an option:";
+        qDebug() << "1. Attack with magic";
+        qDebug() << "2. Attack without magic";
+
+        QTextStream qtin(stdin);
+        option = qtin.readLine();
+
+        if (option == "1") {
+            //Attack with magic
+
+            // check which magic the hero has and then ..
+
+            query.prepare("SELECT Magic.name, Magic.strength, Magic.self_strength FROM Magic, Magic_Shop, hero WHERE Magic_Shop.hero_id = :id AND Magic_Shop.magic_id = :magic_id AND Magic_Shop.magic_id = Magic.id AND Magic_Shop.hero_id = hero.id");
+            query.bindValue(":id", _id);
+            query.bindValue(":magic_id", magic->get_id());
+
+            int chosenMagic;
+            QString selectedMagic;
+
+                if (query.exec()) {
+                    int count = 1;
+                    while (query.next()) {
+                        QString magic_name = query.value("Magic.name").toString();
+                        int magic_self_strength = query.value("Magic.self_strength").toInt();
+                        int magic_strength = query.value("Magic.strength").toInt();
+                        qDebug() << count << ". " << magic_name << " with strength " << magic_strength <<" and self_strength " << magic_self_strength << Qt::endl;
+                        count++;
+                    }
+
+                    bool isValidSelection = false;
+                    QTextStream input(stdin);
+                    QString userInput;
+
+                    while (!isValidSelection) {
+                        qDebug() << "Enter the number of the magic you want to use: ";
+                        userInput = input.readLine();
+                        chosenMagic = userInput.toInt();
+
+                        if (chosenMagic > 0 && chosenMagic < count) {
+                            isValidSelection = true;
+                        }
+                        else {
+                            qDebug() << "Invalid selection. Please choose a valid number." << Qt::endl;
+                        }
+                    }
+
+                    query.seek(chosenMagic - 1);
+                    selectedMagic = query.value(0).toString();
+                    qDebug() << "You have selected: " << selectedMagic << Qt::endl;
+
+                }
+                else {
+                    qDebug() << "Error: Failed ." << query.lastError().text()<< Qt::endl;
+                }
+
+
+                QSqlQuery query;
+                query.prepare("SELCET name, strength, self_strngth FROM Magic WHERE name = :magic_name");
+                query.bindValue(":magic_name", selectedMagic);
+
+
+            int magic_strength = magic->get_strength();
+            int magic_Self_strength = magic->get_Self_strength();
+
+
+            enemy_hp -= _strength + magic_strength ;
+
+            _hp -= enemy_strength+magic_Self_strength;
+
+            qDebug() << "The hero attacked the enemy with power: " << _strength + magic_strength << Qt::endl;
+            qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
+            qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
+
+        }
+        else if (option == "2") {
+            // Attack without magic
+
             enemy_hp -= _strength;
 
             _hp -= enemy_strength;
@@ -405,6 +514,14 @@ bool Hero::fightEnemyInCave(Cave* cave) {
             qDebug() << "The hero attacked the enemy with power: " << _strength << Qt::endl;
             qDebug() << "Enemy's health after the attack: " << enemy_hp << Qt::endl;
             qDebug() << _name<<"'s health after the attack: " << _hp << Qt::endl;
+
+        }
+        else {
+            qDebug() << "Invalid option. Please choose a valid option." << Qt::endl;
+        }
+    }
+  while (option != "1" && option != "2");
+
 
 
             if (_hp <=0){
@@ -446,7 +563,6 @@ bool Hero::fightEnemyInCave(Cave* cave) {
                         return true;
                     }
                 }
-     //           return true;
 
             }
             else {
@@ -529,7 +645,6 @@ bool Hero::Defeated_Cave_Actions(){
 
 }
 
-
 bool Hero::Buy_Magic(Magic* magic) {
     QSqlQuery query;
 
@@ -582,12 +697,3 @@ bool Hero::Buy_Magic(Magic* magic) {
         return true;
 
 }
-
-
-
-
-/*Hero::~Hero()
-{
-delete ;
-}
-*/

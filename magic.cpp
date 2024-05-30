@@ -47,7 +47,11 @@ void Magic::Select_Magic() {
 
          sleep(1);
 
-     qDebug() << "  >> Here is a list  of the magic, you can buy: " << Qt::endl;
+     qDebug() << "  >> Befor you start, let's buy some magic : " << Qt::endl;
+
+         sleep(1);
+
+     qDebug() << "  >> Here is a list of the magic, you can buy: " << Qt::endl;
 
          sleep(1);
 
