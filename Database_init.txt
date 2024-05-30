@@ -1,0 +1,106 @@
+
+
+CREATE TABLE hero (
+  Name VARCHAR(255),
+  HP INT,
+  XP INT,
+  Level INT,
+  Strength INT,
+  Gold INT,
+  magic_level INT,
+  id INT NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE enemy (
+  Name VARCHAR(255),
+  HP INT,
+  XP INT,
+  Strength INT,
+  element VARCHAR(50)
+);
+
+
+CREATE TABLE Cave (
+  cave_id INT NOT NULL AUTO_INCREMENT,
+  cave_name VARCHAR(255),
+  gold INT,
+  PRIMARY KEY (cave_id)
+);
+
+
+CREATE TABLE Cave_enemy (
+  enemy_id INT,
+  cave_id INT,
+  enemy_name VARCHAR(255),
+  HP INT,
+  XP INT,
+  Strength INT,
+  element VARCHAR(50),
+  PRIMARY KEY (enemy_id),
+  FOREIGN KEY (cave_id) REFERENCES Cave(cave_id)
+);
+
+CREATE TABLE Magic (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255),
+  strength INT,
+  self_strength INT,
+  magic_cost INT,
+  element VARCHAR(50),
+  gold_cost INT,
+  requirement VARCHAR(255),
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE Magic_Shop (
+  id INT NOT NULL AUTO_INCREMENT,
+  hero_id INT,
+  magic_id INT,
+  purchased TINYINT(1),
+  PRIMARY KEY (id),
+  FOREIGN KEY (hero_id) REFERENCES hero(id),
+  FOREIGN KEY (magic_id) REFERENCES Magic(id)
+);
+
+
+INSERT INTO enemy (Name, HP, XP, Strength, element)
+VALUES
+('Redback Spider', 4, 100, 1, 'Earth'),
+('The Cute Cobra', 4, 200, 2, 'Water'),
+('The Scorpion', 8, 400, 3, 'Wood'),
+('The Eternal Bug', 10, 500, 4, 'Fire'),
+('The Invisible Monster', 15, 800, 5, 'Metal'),
+('The Notorious Dragon', 30, 1000, 6, 'Fire');
+
+
+INSERT INTO Cave (cave_name, gold)
+VALUES
+('Marble Cave', 10),
+('Crystal Cave', 20),
+('Fingal''s Cave', 40),
+('Naracoorte Cave', 50);
+
+
+INSERT INTO Cave_enemy (enemy_id, cave_id, enemy_name, HP, XP, Strength, element)
+VALUES
+(1, 1, 'Redback Spider', 4, 100, 1, 'Earth'),
+(2, 1, 'The Cute Cobra', 4, 200, 2, 'Water'),
+(3, 2, 'Redback Spider', 4, 100, 1, 'Earth'),
+(4, 2, 'The Cute Cobra', 4, 200, 2, 'Water'),
+(5, 2, 'The Scorpion', 8, 400, 3, 'Wood'),
+(6, 3, 'The Eternal Bug', 10, 500, 4, 'Fire'),
+(7, 3, 'The Invisible Monster', 15, 800, 5, 'Metal'),
+(8, 4, 'The Eternal Bug', 10, 500, 4, 'Fire'),
+(9, 4, 'The Invisible Monster', 15, 800, 5, 'Metal'),
+(10, 4, 'The Notorious Dragon', 30, 1000, 6, 'Fire');
+
+
+INSERT INTO Magic (id, name, strength, self_strength, magic_cost, element, gold_cost, requirement)
+VALUES
+(1, 'Knife',1,0, 0, 'Metal', 0, 'None'),
+(2, 'Sword',3,1, 0, 'Metal', 10, 'Knife'),
+(3, 'Give_Magic', 0, 0, -5, 'Water', 10, 'None'),
+(4, 'Give_Life', 0, -10, 5, 'Water', 20, 'Give_Magic');
+
+
