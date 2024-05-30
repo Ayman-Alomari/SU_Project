@@ -65,12 +65,18 @@ void Hero::Make_Hero(QString name){
     _level = 1;
     _strength = 2;
     _gold = 0;
-    _magic_level=0;
+    _magic_level=1;
 
-      query.prepare("INSERT INTO hero (Name, HP, XP, Level, Strength, Gold, magic_level) VALUES (?, 10, 0, 1, 2, 0, 0)");
+
+
+      query.prepare("INSERT INTO hero (Name, HP, XP, Level, Strength, Gold, magic_level) VALUES (?, 10, 0, 1, 2, 0, 1)");
       query.bindValue(0, name);
 
       if(query.exec()) {
+          query.prepare("SELECT LAST_INSERT_ID()");
+                  query.exec();
+                  query.next();
+                  _id = query.value(0).toInt();
           qDebug() << "The hero" << _name <<"successfully created and saved to the database." << Qt::endl;
           qDebug() << "The hero" << _name <<" with" << _hp << "hp" << _xp << "xp" << _level << "Level" << _strength << "strength" << _gold << "Gold" << _magic_level << "magic_level" << "has been created. " << Qt::endl;
       }

@@ -22,6 +22,7 @@ public:
     int get_gold();
     int get_id();
     int get_enemyNr();
+
     void FightCaveEnemies(int caveId);
     void Select_cave();
     void Assign_cave(QString chosenCave);
@@ -32,6 +33,8 @@ public:
     int get_enemyStrength(int enemy_id);
 
     QString get_enemyName(int enemy_id);
+    QString get_enemyElement(int enemy_id);
+
 };
 
 #endif // CAVE_H

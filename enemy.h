@@ -12,6 +12,7 @@ private:
     int _hp;
     int _xp;
     int _strength;
+    QString _element;
 
 public:
     Enemy();
@@ -23,7 +24,7 @@ public:
     int get_hp();
     int get_xp();
     int get_strength();
-
+    QString get_element();
 
 
 };

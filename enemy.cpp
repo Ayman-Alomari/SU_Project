@@ -66,8 +66,9 @@ void Enemy::Assign_enemy(QString chosenEnemy) {
         _hp = query.value(1).toInt();
         _xp = query.value(2).toInt();
         _strength = query.value(3).toInt();
+        _element = query.value(4).toString();
 
-        qDebug() << "The enemy: " << _name << " has HP: " << _hp << ", XP: " << _xp << ", Strength: " << _strength << Qt::endl;
+        qDebug() << "The enemy: " << _name << " has HP: " << _hp << ", XP: " << _xp << ", Strength: " << _strength << _element << " as an element: " << Qt::endl;
     } else {
         qDebug() << "Error retrieving enemy data from the database." << Qt::endl;
     }
@@ -88,4 +89,8 @@ int Enemy::get_strength(){
 
 QString Enemy::get_name(){
     return  _name;
+}
+
+QString Enemy::get_element(){
+    return  _element;
 }

@@ -38,7 +38,6 @@ QString Magic::get_requirement(){
 }
 
 
-
 void Magic::Select_Magic() {
 
      QSqlQuery query;

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");
-    db.setDatabaseName("SU_Project");
+    db.setDatabaseName("SU_Project_by_M_Ayman_Alomari");
 
     std::cout << "Befor proceeding to the game, please read the files >> Absolutely_readMe << "<< std::endl;
     std::cout << "   >>  Make sure that you have created the database named exactly >> SU_Project << and that you have created the tables which are in the file >> Database_init.txt <<  " << std::endl;

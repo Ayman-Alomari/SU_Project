@@ -33,13 +33,6 @@ public:
     void Assign_Magic(QString ChosenMagic);
 
 
-
-
-
-
-
-
-
 };
 
 #endif // MAGIC_H

@@ -120,9 +120,11 @@ void Cave::Assign_cave(QString chosenCave) {
             int enemyHp = query.value("HP").toInt();
             int enemyXp = query.value("XP").toInt();
             int enemyStrength = query.value("Strength").toInt();
+            QString enemyElemnt = query.value("element").toString();
+
 
             qDebug() << "  >>   " << enemyName << ", HP: " << enemyHp
-                     << ", XP: " << enemyXp << ", Strength: " << enemyStrength << Qt::endl;
+                     << ", XP: " << enemyXp << ", Strength: " << enemyStrength << enemyElemnt << " as an element: " << Qt::endl;
         }
     } else {
         qDebug() << "Error getting cave's enemies from the database." << Qt::endl;
@@ -195,6 +197,18 @@ int Cave::get_enemyStrength(int enemy_id){
 
     if (query.exec() && query.next()) {
         return query.value(0).toInt();
+    }
+    return 0;
+}
+
+QString Cave::get_enemyElement(int enemy_id){
+    QSqlQuery query;
+    query.prepare("SELECT element FROM Cave_enemy WHERE cave_id = :caveId AND enemy_id = :enemy_id");
+    query.bindValue(":caveId", _id);
+    query.bindValue(":enemy_id", enemy_id);
+
+    if (query.exec() && query.next()) {
+        return query.value(0).toString();
     }
     return 0;
 }
